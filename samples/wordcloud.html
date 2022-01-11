@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, viewport-fit=cover"/>
+<meta name="description" content="Given a collection of words and their frequencies or importance, generate a diagram of those words scale by their frequency or importance and then packed together."/> 
+<link rel="stylesheet" href="../assets/css/style.css"/> 
+<!-- Copyright 1998-2021 by Northwoods Software Corporation. -->
+<title>GoJS Wordcloud</title>
+</head>
+
+<body>
+  <!-- This top nav is not part of the sample code -->
+  <!-- <nav id="navTop" class="w-full z-30 top-0 text-white bg-nwoods-primary">
+    <div class="w-full container max-w-screen-lg mx-auto flex flex-wrap sm:flex-nowrap items-center justify-between mt-0 py-2">
+      <div class="md:pl-4">
+        <a class="text-white hover:text-white no-underline hover:no-underline
+        font-bold text-2xl lg:text-4xl rounded-lg hover:bg-nwoods-secondary " href="../">
+          <h1 class="mb-0 p-1 ">GoJS</h1>
+        </a>
+      </div>
+      <button id="topnavButton" class="rounded-lg sm:hidden focus:outline-none focus:ring" aria-label="Navigation">
+        <svg fill="currentColor" viewBox="0 0 20 20" class="w-6 h-6">
+          <path id="topnavOpen" fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
+          <path id="topnavClosed" class="hidden" fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+        </svg>
+      </button>
+      <div id="topnavList" class="hidden lg:text-base sm:block items-center w-auto mt-0 text-white p-0 z-20">
+        <ul class="list-reset list-none font-semibold flex justify-end flex-wrap sm:flex-nowrap items-center px-0 pb-0">
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="../learn/">Learn</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="../samples/">Samples</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="../intro/">Intro</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="../api/">API</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://www.nwoods.com/products/register.html">Register</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="../download.html">Download</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://forum.nwoods.com/c/gojs/11">Forum</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://www.nwoods.com/contact.html"
+           target="_blank" rel="noopener" onclick="getOutboundLink('https://www.nwoods.com/contact.html', 'contact');">Contact</a></li>
+          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://www.nwoods.com/sales/index.html"
+           target="_blank" rel="noopener" onclick="getOutboundLink('https://www.nwoods.com/sales/index.html', 'buy');">Buy</a></li>
+        </ul>
+      </div>
+    </div>
+    <hr class="border-b border-gray-600 opacity-50 my-0 py-0" />
+  </nav> -->
+  <div class="md:flex flex-col md:flex-row md:min-h-screen w-full max-w-screen-xl mx-auto">
+    <!-- <div id="navSide" class="flex flex-col w-full md:w-48 text-gray-700 bg-white flex-shrink-0"></div> -->
+    <!-- * * * * * * * * * * * * * -->
+    <!-- Start of GoJS sample code -->
+    
+<script src="../samples/assets/require.js"></script>
+
+    <div class="p-4 w-full">
+    <script id="code">
+
+    var myDiagram;
+    var inputBox;
+    var PackedLayout;
+
+    function init() {
+      require(["../extensionsTS/PackedLayout"], function(app) {
+
+        PackedLayout = app.PackedLayout;
+
+        var $ = go.GraphObject.make;  // for conciseness in defining templates
+
+        myDiagram =
+          $(go.Diagram, 'myDiagramDiv',  // must be the ID or reference to div
+            {
+              'animationManager.isEnabled': true,
+              isReadOnly: true, autoScale: go.Diagram.Uniform
+            });
+
+        // Nodes have a template with bindings for size, shape, and fill color
+        myDiagram.nodeTemplate =
+          $(go.Node, 'Auto',
+            new go.Binding('scale', 'scale'),
+            $(go.TextBlock,
+              new go.Binding('text', 'text'),
+              new go.Binding('stroke', 'stroke'),
+              new go.Binding('font', 'font'))
+          );
+
+        // find the word input box in the DOM
+        inputBox = document.getElementById('textInput');
+
+        // create a layout with the default values
+        rebuildGraph();
+      });
+    }
+
+    function rebuildGraph() {
+      var frequencies = getWordFrequencies();
+      var nodeData = generateNodeData(frequencies);
+      myDiagram.model = new go.GraphLinksModel(nodeData);
+
+      myDiagram.startTransaction('create wordcloud');
+      myDiagram.layout = go.GraphObject.make(PackedLayout, {
+        spacing: 5,
+        arrangesToOrigin: false
+      });
+      myDiagram.commitTransaction('create wordcloud');
+    }
+
+    // returns a map (word -> frequency) of words in the text
+    function getWordFrequencies() {
+      
+      // 워드클라우드에서 제외하고 싶은 단어 리스트 
+      var stopWords = ['욕','욕설','비방','비난'];
+
+   
+      // 정규식 표현 : 영어+숫자
+      //var word = /[@a-z0-9]+([-.:/'’\u2032\u00A0\u200C\u200D~]+[@a-z0-9]+)*/gi;
+
+      // 정규식 표현 : 한글
+      var word = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+([-.:/'’\u2032\u00A0\u200C\u200D~]+[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+)*/gi;
+
+      // 최종 워드클라우드로 만들 문자열 text
+      // var text = inputBox.value;
+      var text = "우와 안녕하세요 워드클라우드 정말 좋아요 너무 좋아요 히히히히";
+
+      var frequencies = new go.Map();
+      var result;
+      while ((result = word.exec(text)) !== null) {
+        var match = result[0].toLowerCase();
+        if (stopWords.indexOf(match) > -1) { // skip stop words
+          continue;
+        }
+        if (!isNaN(Number(match))) { // skip numbers
+          continue;
+        }
+
+        if (frequencies.has(match)) {
+          frequencies.add(match, frequencies.get(match) + 1);
+        } else {
+          frequencies.add(match, 1);
+        }
+      }
+
+      return frequencies;
+    }
+
+    // creates a list of nodes from the frequency map
+    function generateNodeData(frequencies) {
+      // convert map to array
+      var it = frequencies.iterator;
+      var freqArr = [];
+      while (it.next()) {
+        freqArr.push({ word: it.key, freq: it.value })
+      }
+
+      // sort the frequency array in descending order
+      freqArr.sort(function(a, b) {
+        return b.freq - a.freq;
+      })
+
+      // create an array of nodes, scaled appropriately by frequency
+      var nodes = [];
+      var singleOccurrenceCount = 0;
+      for (var i = 0; i < freqArr.length; i++) {
+        if (freqArr[i].freq === 1) {
+          singleOccurrenceCount++;
+        }
+        // stop creating nodes if we've already added too many that only occurred once, or if we've added 150 already
+        if ((i > 25 && singleOccurrenceCount > 0.25 * i) || i > 150) {
+          break;
+        }
+        // scale node size logarithmically with frequency
+        var scale = 2 * Math.log(freqArr[i].freq) + 1;
+        nodes.push({ text: freqArr[i].word, scale: scale });
+      }
+
+      // randomize order if checkbox is checked
+      if (document.getElementById('randomizePositions').checked) {
+        var j, x, i;
+        for (i = nodes.length - 1; i > 0; i--) {
+          j = Math.floor(Math.random() * (i + 1));
+          x = nodes[i];
+          nodes[i] = nodes[j];
+          nodes[j] = x;
+        }
+      }
+
+      return nodes;
+    }
+
+    window.addEventListener('DOMContentLoaded', init);
+  </script>
+  <style>
+    input[type=checkbox] {
+      vertical-align: middle;
+      position: relative;
+      bottom: 2px;
+    }
+  </style>
+
+  <div id="sample">
+  <!-- The DIV for the Diagram needs an explicit size or else we won't see anything.
+      This also adds a border to help see the edges of the viewport. -->
+  <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:500px"></div>
+  
+
+  <textarea style="margin-top: 12px; max-width: 100%;" rows="6" cols="75" id='textInput' hidden>
+   새로운 시작은 늘 설레게 하지 모든 걸 이뤄낼 것 처럼
+  </textarea>
+
+  <br>Randomize word positions <input type="checkbox" id="randomizePositions" onclick="rebuildGraph()" checked/>
+
+  <br><button style="margin-bottom: 12px; margin-top: 6px;" onclick="rebuildGraph()">Generate wordcloud</button>
+
+  <!-- <p>
+    This sample demonstrates a simple way to create a wordcloud visualization
+    using the PackedLayout extension. The most frequent words in the text are
+    shown larger, and common english words such as 'the' or 'of' are skipped.
+    This example shows the text from the <a href="../index.html">GoJS home page</a>,
+    but you can easily create your own by copying text into the box above.
+  </p> -->
+  </div>
+    </div>
+    <!-- * * * * * * * * * * * * * -->
+    <!--  End of GoJS sample code  -->
+  </div>
+</body>
+<!--  This script is part of the gojs.net website, and is not needed to run the sample -->
+<script src="../assets/js/goSamples.js"></script>
+</html>
