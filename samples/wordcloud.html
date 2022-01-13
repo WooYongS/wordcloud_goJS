@@ -10,44 +10,6 @@
 </head>
 
 <body>
-  <!-- This top nav is not part of the sample code -->
-  <!-- <nav id="navTop" class="w-full z-30 top-0 text-white bg-nwoods-primary">
-    <div class="w-full container max-w-screen-lg mx-auto flex flex-wrap sm:flex-nowrap items-center justify-between mt-0 py-2">
-      <div class="md:pl-4">
-        <a class="text-white hover:text-white no-underline hover:no-underline
-        font-bold text-2xl lg:text-4xl rounded-lg hover:bg-nwoods-secondary " href="../">
-          <h1 class="mb-0 p-1 ">GoJS</h1>
-        </a>
-      </div>
-      <button id="topnavButton" class="rounded-lg sm:hidden focus:outline-none focus:ring" aria-label="Navigation">
-        <svg fill="currentColor" viewBox="0 0 20 20" class="w-6 h-6">
-          <path id="topnavOpen" fill-rule="evenodd" d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM9 15a1 1 0 011-1h6a1 1 0 110 2h-6a1 1 0 01-1-1z" clip-rule="evenodd"></path>
-          <path id="topnavClosed" class="hidden" fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-        </svg>
-      </button>
-      <div id="topnavList" class="hidden lg:text-base sm:block items-center w-auto mt-0 text-white p-0 z-20">
-        <ul class="list-reset list-none font-semibold flex justify-end flex-wrap sm:flex-nowrap items-center px-0 pb-0">
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="../learn/">Learn</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="../samples/">Samples</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="../intro/">Intro</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="../api/">API</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://www.nwoods.com/products/register.html">Register</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="../download.html">Download</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://forum.nwoods.com/c/gojs/11">Forum</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://www.nwoods.com/contact.html"
-           target="_blank" rel="noopener" onclick="getOutboundLink('https://www.nwoods.com/contact.html', 'contact');">Contact</a></li>
-          <li class="p-1 sm:p-0"><a class="topnav-link" href="https://www.nwoods.com/sales/index.html"
-           target="_blank" rel="noopener" onclick="getOutboundLink('https://www.nwoods.com/sales/index.html', 'buy');">Buy</a></li>
-        </ul>
-      </div>
-    </div>
-    <hr class="border-b border-gray-600 opacity-50 my-0 py-0" />
-  </nav> -->
-  <div class="md:flex flex-col md:flex-row md:min-h-screen w-full max-w-screen-xl mx-auto">
-    <!-- <div id="navSide" class="flex flex-col w-full md:w-48 text-gray-700 bg-white flex-shrink-0"></div> -->
-    <!-- * * * * * * * * * * * * * -->
-    <!-- Start of GoJS sample code -->
-    
 <script src="../samples/assets/require.js"></script>
 
     <div class="p-4 w-full">
@@ -72,10 +34,25 @@
             });
 
         // Nodes have a template with bindings for size, shape, and fill color
+        // 워드클라우드 노드(각 단어의 구름모양) 템플릿 설정( 크기, 모양, 컬러, 폰트)
+        // 워드클라우드 노드(각 단어의 구름모양) 템플릿 설정( 크기, 모양, 컬러, 폰트)
+        // 워드클라우드 노드(각 단어의 구름모양) 템플릿 설정( 크기, 모양, 컬러, 폰트)
         myDiagram.nodeTemplate =
           $(go.Node, 'Auto',
             new go.Binding('scale', 'scale'),
-            $(go.TextBlock,
+            // 노드 설정 
+            $(go.Shape, {
+                              figure : "RoundedRectangle",
+                              fill : "orange",
+                              stroke : "orange",
+                              strokeWidth : 1 } ),
+            // 텍스트 설정
+             $(go.TextBlock, { 
+                              // margin : 5, 
+                              stroke : "black"
+                              // background : "lightblue",
+                              // font: "20pt"
+                            },
               new go.Binding('text', 'text'),
               new go.Binding('stroke', 'stroke'),
               new go.Binding('font', 'font'))
@@ -89,10 +66,16 @@
       });
     }
 
+
+    // wordcloud 그래프 생성함수
+    // wordcloud 그래프 생성함수
+    // wordcloud 그래프 생성함수
     function rebuildGraph() {
       var frequencies = getWordFrequencies();
       var nodeData = generateNodeData(frequencies);
       myDiagram.model = new go.GraphLinksModel(nodeData);
+
+      // 글씨 컬러 변경
 
       myDiagram.startTransaction('create wordcloud');
       myDiagram.layout = go.GraphObject.make(PackedLayout, {
@@ -110,17 +93,173 @@
 
    
       // 정규식 표현 : 영어+숫자
-      //var word = /[@a-z0-9]+([-.:/'’\u2032\u00A0\u200C\u200D~]+[@a-z0-9]+)*/gi;
+      // var word = /[@a-z0-9]+([-.:/'’\u2032\u00A0\u200C\u200D~]+[@a-z0-9]+)*/gi;
 
       // 정규식 표현 : 한글
       var word = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+([-.:/'’\u2032\u00A0\u200C\u200D~]+[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]+)*/gi;
 
       // 최종 워드클라우드로 만들 문자열 text
       // var text = inputBox.value;
-      var text = "우와 안녕하세요 워드클라우드 정말 좋아요 너무 좋아요 히히히히";
+      
+      var text = 
+      `
+      룩셈부르크
+    르완다
+    리비아
+    리투아니아
+    리히텐슈타인
+    마다가스카르
+    마셜 제도
+    마케도니아 공화국
+    말라위
+    말레이시아
+    말리
+    멕시코
+    모나코
+    모로코
+    모리셔스
+    모리타니
+    모잠비크
+    몬테네그로
+    몰도바
+    몰디브
+    몰타
+    몽골
+    미국
+    미얀마
+    미크로네시아 연방
+    바누아투
+    바레인
+    바베이도스
+    바티칸 시국
+    바하마
+    방글라데시
+    베냉
+    베네수엘라
+    베트남
+    벨기에
+    벨라루스
+    벨리즈
+    보스니아 헤르체고비나
+    보츠와나
+    볼리비아
+    부룬디
+    부르키나파소
+    부탄
+    북키프로스
+    불가리아
+    브라질
+    브루나이
+    사모아
+    사우디아라비아
+    사하라 아랍 민주 공화국
+    산마리노
+    상투메 프린시페
+    세네갈
+    세르비아
+    세이셸
+    세인트루시아
+    세인트빈센트 그레나딘
+    세인트키츠 네비스
+    소말리아
+    소말릴란드
+    솔로몬 제도
+    수단
+    수리남
+    스리랑카
+    스와질란드
+    스웨덴
+    스위스
+    스페인
+    슬로바키아
+    슬로베니아
+    시리아
+    시에라리온
+    싱가포르
+    아랍에미리트
+    아르메니아
+    아르헨티나
+    아이슬란드
+    아이티
+    아일랜드
+    아제르바이잔
+    아프가니스탄
+    안도라
+    알바니아
+    알제리
+    압하스
+    앙골라
+    앤티가 바부다
+    에리트레아
+    에스토니아
+    에콰도르
+    에티오피아
+    엘살바도르
+    영국
+    예멘
+    오만
+    오스트레일리아
+    오스트리아
+    온두라스
+    요르단
+    우간다
+    우루과이
+    우즈베키스탄
+    우크라이나
+    이라크
+    이란
+    이스라엘
+    이집트
+    이탈리아
+    인도
+    인도네시아
+    일본
+    자메이카
+    잠비아
+    적도 기니
+    조선민주주의인민공화국
+    조지아
+    중앙아프리카 공화국
+    중화민국
+    중화인민공화국
+    지부티
+    짐바브웨
+    차드
+    체코
+    칠레
+    카메룬
+    카보베르데
+    카자흐스탄
+    카타르
+    캄보디아
+    캐나다
+    케냐
+    코모로
+    코소보 공화국
+    코스타리카
+    코트디부아르
+    콜롬비아
+    콩고 공화국
+    콩고 민주 공화국
+    쿠바
+    쿠웨이트
+    크로아티아
+    키르기스스탄
+    키리바시
+    키프로스
+    타지키스탄
+    탄자니아
+`
+  
+ console.log(text)
+
+
 
       var frequencies = new go.Map();
       var result;
+
+      // 정규식(한글만)에 맞는 문자열만 result에 저장
+      // 빈도수 계산
       while ((result = word.exec(text)) !== null) {
         var match = result[0].toLowerCase();
         if (stopWords.indexOf(match) > -1) { // skip stop words
@@ -141,10 +280,14 @@
     }
 
     // creates a list of nodes from the frequency map
+    // text의 문자열 [단어:빈도수] 맵핑작업
+    // text의 문자열 [단어:빈도수] 맵핑작업
     function generateNodeData(frequencies) {
       // convert map to array
       var it = frequencies.iterator;
       var freqArr = [];
+
+      console.log(freqArr)
       while (it.next()) {
         freqArr.push({ word: it.key, freq: it.value })
       }
@@ -161,17 +304,26 @@
         if (freqArr[i].freq === 1) {
           singleOccurrenceCount++;
         }
+       
         // stop creating nodes if we've already added too many that only occurred once, or if we've added 150 already
-        if ((i > 25 && singleOccurrenceCount > 0.25 * i) || i > 150) {
-          break;
-        }
+        // 같은 빈도수를 가진 노드들의 개수를 제한
+        // if ((i > 25 && singleOccurrenceCount > 0.25 * i) || i > 150) {
+        //   break;
+        // }
+
         // scale node size logarithmically with frequency
         var scale = 2 * Math.log(freqArr[i].freq) + 1;
         nodes.push({ text: freqArr[i].word, scale: scale });
       }
 
+      console.log()
+
       // randomize order if checkbox is checked
-      if (document.getElementById('randomizePositions').checked) {
+
+      // 무조건 랜덤으로 배열되게 설정
+      // if (document.getElementById('randomizePositions').checked) 
+      if (1==1) 
+      {
         var j, x, i;
         for (i = nodes.length - 1; i > 0; i--) {
           j = Math.floor(Math.random() * (i + 1));
@@ -195,32 +347,29 @@
   </style>
 
   <div id="sample">
-  <!-- The DIV for the Diagram needs an explicit size or else we won't see anything.
-      This also adds a border to help see the edges of the viewport. -->
-  <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:500px"></div>
   
-
+    
+<!-- 직사각형 다이어그램 상자 크기 설정-->
+<!-- 직사각형 다이어그램 상자 크기 설정-->
+<!-- 직사각형 다이어그램 상자 크기 설정-->
+  <div id="myDiagramDiv" style="border: solid 1px black; width:100%; height:700px"></div>
+  
+<!-- 
   <textarea style="margin-top: 12px; max-width: 100%;" rows="6" cols="75" id='textInput' hidden>
-   새로운 시작은 늘 설레게 하지 모든 걸 이뤄낼 것 처럼
+   
+    워드클라우드 분석할 문자열
+
   </textarea>
+ -->
 
-  <br>Randomize word positions <input type="checkbox" id="randomizePositions" onclick="rebuildGraph()" checked/>
+  <!-- <br>Randomize word positions <input type="checkbox" id="randomizePositions" onclick="rebuildGraph()" checked/> -->
 
-  <br><button style="margin-bottom: 12px; margin-top: 6px;" onclick="rebuildGraph()">Generate wordcloud</button>
+  <!-- <br><button style="margin-bottom: 12px; margin-top: 6px;" onclick="rebuildGraph()">Generate wordcloud</button> -->
 
-  <!-- <p>
-    This sample demonstrates a simple way to create a wordcloud visualization
-    using the PackedLayout extension. The most frequent words in the text are
-    shown larger, and common english words such as 'the' or 'of' are skipped.
-    This example shows the text from the <a href="../index.html">GoJS home page</a>,
-    but you can easily create your own by copying text into the box above.
-  </p> -->
+
   </div>
     </div>
-    <!-- * * * * * * * * * * * * * -->
-    <!--  End of GoJS sample code  -->
+
   </div>
-</body>
-<!--  This script is part of the gojs.net website, and is not needed to run the sample -->
-<script src="../assets/js/goSamples.js"></script>
+
 </html>
