@@ -1,4 +1,3 @@
-<!-- 
 -- goJS API Documentation
 -- https://gojs.net/latest/api/
 
@@ -8,4 +7,3 @@
 -- https://gojs.net/latest/intro/shapes.html
 
 
- -->
